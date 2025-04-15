@@ -42,3 +42,13 @@ def handle_post():
         return {"posts": _list_posts()}
 
 
+@app.route("/<int:post_id>")
+def get_id(post_id):
+    post = db.get_or_404(Post, post_id)
+    return {
+            "id": post.id,
+            "title": post.title,
+            "body": post.body,
+            "created": post.created,
+            "author_id": post.author_id
+        }
