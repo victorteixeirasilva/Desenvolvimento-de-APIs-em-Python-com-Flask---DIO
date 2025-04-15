@@ -68,4 +68,5 @@ def create_app(test_config=None):
 
     from dio_bank.src.controller import user, post
     app.register_blueprint(user.app)
+    app.register_blueprint(post.app)
     return app
