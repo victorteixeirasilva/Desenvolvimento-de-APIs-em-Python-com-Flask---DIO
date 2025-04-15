@@ -1,3 +1,5 @@
+from http import HTTPStatus
+
 from flask import Blueprint, request
 from sqlalchemy import inspect
 
@@ -27,7 +29,7 @@ def _list_users():
 def handle_user():
     if request.method == "POST":
         _create_user()
-        return {"message": "User Created!"}, 201
+        return {"message": "User Created!"}, HTTPStatus.CREATED
     else:
         return {"users": _list_users()}
 
@@ -39,6 +41,13 @@ def get_id(user_id):
             "id": user.id,
             "username": user.username
         }
+
+@app.route("/<int:user_id>", methods=["DELETE"])
+def delete(user_id):
+    user = db.get_or_404(User, user_id)
+    db.session.delete(user)
+    db.session.commit()
+    return "", HTTPStatus.NO_CONTENT
 
 
 @app.route("/<int:user_id>", methods=["PATCH"])
