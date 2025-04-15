@@ -60,3 +60,22 @@ def delete(post_id):
     db.session.delete(post)
     db.session.commit()
     return "", HTTPStatus.NO_CONTENT
+
+@app.route("/<int:post_id>", methods=["PATCH"])
+def update(post_id):
+    post = db.get_or_404(Post, post_id)
+    data = request.json
+
+    mapper = inspect(Post)
+    for column in mapper.attrs:
+        if column.key in data:
+            setattr(post, column.key, data[column.key])
+    db.session.commit()
+
+    return {
+            "id": post.id,
+            "title": post.title,
+            "body": post.body,
+            "created": post.created,
+            "author_id": post.author_id
+        }
