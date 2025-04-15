@@ -1,4 +1,6 @@
 from flask import Blueprint, request
+from sqlalchemy import inspect
+
 from dio_bank.src.app import User, db
 
 app = Blueprint('user', __name__, url_prefix='/users')
@@ -33,6 +35,27 @@ def handle_user():
 @app.route("/<int:user_id>")
 def get_id(user_id):
     user = db.get_or_404(User, user_id)
+    return {
+            "id": user.id,
+            "username": user.username
+        }
+
+
+@app.route("/<int:user_id>", methods=["PATCH"])
+def update(user_id):
+    user = db.get_or_404(User, user_id)
+    data = request.json
+
+    # if "username" in data:
+    #     user.username = data["username"]
+    #     db.session.commit()
+
+    mapper = inspect(User)
+    for column in mapper.attrs:
+        if column.key in data:
+            setattr(user, column.key, data[column.key])
+    db.session.commit()
+
     return {
             "id": user.id,
             "username": user.username
