@@ -1,21 +1,24 @@
-from datetime import datetime
 import os
+from datetime import datetime
 
 import click
+import sqlalchemy as sa
 from flask import Flask, current_app
 from flask_sqlalchemy import SQLAlchemy
-import sqlalchemy as sa
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.orm import Mapped, mapped_column
+from flask_migrate import Migrate
 
 class Base(DeclarativeBase):
   pass
 
 db = SQLAlchemy(model_class=Base)
+migrate = Migrate()
 
 class User(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
     username: Mapped[str] = mapped_column(unique=True, nullable=False)
+    active: Mapped[bool] = mapped_column(default=True)
 
     def __repr__(self) -> str:
         return f"User(id={self.id!r}, username={self.username!r})"
@@ -65,6 +68,7 @@ def create_app(test_config=None):
 
     app.cli.add_command(init_db_command)
     db.init_app(app)
+    migrate.init_app(app, db)
 
     from dio_bank.src.controller import user, post
     app.register_blueprint(user.app)
